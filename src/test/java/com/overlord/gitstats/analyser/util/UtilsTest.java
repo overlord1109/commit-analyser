@@ -10,8 +10,12 @@ public class UtilsTest {
 
     @Test
     public void shouldDeleteFilesRecursively() throws IOException {
-        new File("test-output" + File.separator + "test1").mkdirs();
-        new File("test-output" + File.separator + "test2" + File.separator + "test21").mkdirs();
+        File test1 = new File("test-output" + File.separator + "test1");
+        test1.mkdirs();
+        File test2 = new File("test-output" + File.separator + "test2" + File.separator + "test21");
+        test2.mkdirs();
+
+        Assert.assertTrue(test2.exists() && test2.isDirectory());
 
         File f = new File("test-output");
         Utils.deleteRecursively(f);
