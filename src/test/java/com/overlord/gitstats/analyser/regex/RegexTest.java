@@ -38,4 +38,16 @@ public class RegexTest {
         Assert.assertFalse(methodDeclarationWithoutWhitespace.matches(JAVA_METHOD_PATTERN));
         Assert.assertTrue(methodDeclarationWithWhitespace.matches(JAVA_METHOD_PATTERN));
     }
+
+    @Test
+    public void testMethodCall() {
+        String methodCall = "int sum = add(1, 2);";
+        Assert.assertFalse(methodCall.matches(JAVA_METHOD_PATTERN));
+    }
+
+    @Test
+    public void testNewCall() {
+        String methodCall = "File myFile = new File(\"path to file\");";
+        Assert.assertFalse(methodCall.matches(JAVA_METHOD_PATTERN));
+    }
 }
