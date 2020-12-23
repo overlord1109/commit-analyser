@@ -20,4 +20,14 @@ public class GitClientIntegrationTest {
         repo.close();
         Utils.deleteRecursively(new File("test-output"));
     }
+
+    @Test
+    public void shouldWalkAllCommits() throws GitAPIException, IOException {
+        GitClient gitClient = new GitClient("https://github.com/overlord1109/ctci.git", "test-output");
+        Git repo = gitClient
+                .cloneRepository();
+        gitClient.simpleCommitHistoryWalk(repo);
+        repo.close();
+        Utils.deleteRecursively(new File("test-output"));
+    }
 }
