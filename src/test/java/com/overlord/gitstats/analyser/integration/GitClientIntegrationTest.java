@@ -26,7 +26,7 @@ public class GitClientIntegrationTest {
         GitClient gitClient = new GitClient("https://github.com/overlord1109/ctci.git", "test-output");
         Git repo = gitClient
                 .cloneRepository();
-        gitClient.getCommitsModifyingJavaMethodDeclarations(repo);
+        Assert.assertFalse(gitClient.getCommitsModifyingJavaMethodDeclarations(repo).isEmpty());
         repo.close();
         Utils.deleteRecursively(new File("test-output"));
     }

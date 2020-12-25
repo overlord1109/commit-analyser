@@ -4,8 +4,6 @@ import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.diff.DiffFormatter;
-import org.eclipse.jgit.errors.IncorrectObjectTypeException;
-import org.eclipse.jgit.errors.MissingObjectException;
 import org.eclipse.jgit.errors.StopWalkException;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectReader;
@@ -41,7 +39,7 @@ public class DiffPatternRevFilter extends RevFilter {
     }
 
     @Override
-    public boolean include(RevWalk walker, RevCommit cmit) throws StopWalkException, MissingObjectException, IncorrectObjectTypeException, IOException {
+    public boolean include(RevWalk walker, RevCommit cmit) throws StopWalkException, IOException {
         RevCommit[] parents = cmit.getParents();
         for (RevCommit parent : parents) {
             AbstractTreeIterator oldTreeParser = prepareTreeParser(repo, parent.getName());

@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,7 +45,7 @@ public class GitClient {
         return git;
     }
 
-    public List<RevCommit> getCommitsModifyingJavaMethodDeclarations(Git git) throws IOException, GitAPIException {
+    public List<RevCommit> getCommitsModifyingJavaMethodDeclarations(Git git) throws IOException {
         Repository repo = git.getRepository();
         RevWalk walk = new RevWalk(repo);
         walk.markStart(walk.parseCommit(repo.resolve("HEAD")));
