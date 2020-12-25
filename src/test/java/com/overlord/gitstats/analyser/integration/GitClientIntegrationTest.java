@@ -22,11 +22,11 @@ public class GitClientIntegrationTest {
     }
 
     @Test
-    public void shouldWalkAllCommits() throws GitAPIException, IOException {
+    public void shouldGetCommitsModifyingJavaMethodDeclarations() throws GitAPIException, IOException {
         GitClient gitClient = new GitClient("https://github.com/overlord1109/ctci.git", "test-output");
         Git repo = gitClient
                 .cloneRepository();
-        gitClient.simpleCommitHistoryWalk(repo);
+        gitClient.getCommitsModifyingJavaMethodDeclarations(repo);
         repo.close();
         Utils.deleteRecursively(new File("test-output"));
     }

@@ -18,3 +18,9 @@ dependencies {
 test {
     exclude "**/integration/**"
 }
+
+task integrationTests(type:Test){
+    filter {
+        includeTestsMatching "com.overlord.gitstats.analyser.integration.*"
+    }
+}
