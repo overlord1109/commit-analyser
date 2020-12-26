@@ -6,8 +6,7 @@ import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 
-import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,8 +14,8 @@ import java.util.Map;
 public class JavaSourceParser {
 
     //Extract method declarations as a map of the method name to a list of parameters
-    public Map<String, List<Parameter>> extractDeclarations(String filePath) throws FileNotFoundException {
-        CompilationUnit cu = StaticJavaParser.parse(new File(filePath));
+    public Map<String, List<Parameter>> extractDeclarations(InputStream in) {
+        CompilationUnit cu = StaticJavaParser.parse(in);
         MethodVisitor methodVisitor = new MethodVisitor(new HashMap<>());
         methodVisitor.visit(cu, null);
         return methodVisitor.getDeclarations();
