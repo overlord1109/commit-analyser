@@ -69,11 +69,12 @@ public class GitClient {
         RevWalk walk = new RevWalk(repo);
         walk.markStart(walk.parseCommit(repo.resolve("HEAD")));
 
-        for (RevCommit cmit : walk) {
-            RevCommit[] parents = cmit.getParents();
+        //Walk the commit-graph from the latest commit
+        for (RevCommit commit : walk) {
+            RevCommit[] parents = commit.getParents();
             for (RevCommit parent : parents) {
                 AbstractTreeIterator oldTreeParser = prepareTreeParser(repo, parent.getName());
-                AbstractTreeIterator newTreeParser = prepareTreeParser(repo, cmit.getName());
+                AbstractTreeIterator newTreeParser = prepareTreeParser(repo, commit.getName());
                 List<DiffEntry> diffs = git.diff()
                         .setOldTree(oldTreeParser)
                         .setNewTree(newTreeParser)
@@ -84,21 +85,27 @@ public class GitClient {
                     if (diff.getChangeType() != DiffEntry.ChangeType.MODIFY)
                         continue;
 
-                    ByteArrayOutputStream out = new ByteArrayOutputStream();
-                    try (DiffFormatter formatter = new DiffFormatter(out)) {
-                        formatter.setRepository(repo);
-                        formatter.format(diff);
-                        String diffLines = out.toString();
-                        //Only include those diffs which modified something resembling a Java method declaration
-                        boolean matches = pattern.matcher(diffLines).find();
-                        if (matches) {
-                            changes.add(new Change(diff.getNewPath(), parent.getName(), cmit.getName()));
-                        }
+                    //Only include those diffs which modified something resembling a Java method declaration
+                    boolean matches = pattern.matcher(getDiffContent(repo, diff)).find();
+                    if (matches) {
+                        changes.add(new Change(diff.getNewPath(), parent.getName(), commit.getName()));
                     }
                 }
             }
         }
         return changes;
+    }
+
+    /**
+     * Extract diff content as a String for subsequent pattern-matching
+     */
+    private String getDiffContent(Repository repo, DiffEntry diff) throws IOException {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        try (DiffFormatter formatter = new DiffFormatter(out)) {
+            formatter.setRepository(repo);
+            formatter.format(diff);
+            return out.toString();
+        }
     }
 
     /**
