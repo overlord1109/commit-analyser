@@ -56,19 +56,20 @@ public class RegexTest {
 
     @Test
     public void testDiff() throws URISyntaxException, IOException {
-        String diff = new String(Files.readAllBytes(
-                Paths.get(this.getClass()
-                        .getResource("/diff/diff-output-1.txt")
-                        .toURI())));
+        String diff = readFileAsString("/diff/diff-output-1.txt");
         Assert.assertTrue(JavaMethodPatternMatcher.instance().matches(diff));
     }
 
     @Test
     public void testDiffWithoutMethodDeclarationChange() throws URISyntaxException, IOException {
-        String diff = new String(Files.readAllBytes(
-                Paths.get(this.getClass()
-                        .getResource("/diff/diff-output-2.txt")
-                        .toURI())));
+        String diff = readFileAsString("/diff/diff-output-2.txt");
         Assert.assertFalse(JavaMethodPatternMatcher.instance().matches(diff));
+    }
+
+    private String readFileAsString(String path) throws IOException, URISyntaxException {
+        return new String(Files.readAllBytes(
+                Paths.get(this.getClass()
+                        .getResource(path)
+                        .toURI())));
     }
 }
