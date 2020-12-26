@@ -12,6 +12,8 @@ repositories {
 dependencies {
     implementation 'org.eclipse.jgit:org.eclipse.jgit:5.10.0.202012080955-r'
     implementation 'org.slf4j:slf4j-simple:1.7.30'
+    implementation 'com.github.javaparser:javaparser-core:3.18.0'
+
     testImplementation 'junit:junit:4.13.1'
 }
 
