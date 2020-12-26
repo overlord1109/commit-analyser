@@ -8,6 +8,7 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.diff.DiffFormatter;
 import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.ObjectLoader;
 import org.eclipse.jgit.lib.ObjectReader;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -15,6 +16,8 @@ import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.AbstractTreeIterator;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
+import org.eclipse.jgit.treewalk.TreeWalk;
+import org.eclipse.jgit.treewalk.filter.PathFilter;
 import org.eclipse.jgit.treewalk.filter.PathSuffixFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -51,7 +55,6 @@ public class GitClient {
                 .setTimeout(60)
                 .setURI(this.httpsUrl)
                 .setDirectory(new File(localStoragePath + File.separator + "remote"))
-                .setCloneAllBranches(true)
                 .call();
         LOGGER.info("Repository cloned");
         return git;
@@ -62,15 +65,16 @@ public class GitClient {
      * and whose diff contents match something resembling a Java method declaration
      */
     public List<Change> getChangesModifyingJavaMethodDeclarations(Git git) throws IOException, GitAPIException {
+        LOGGER.info("Obtaining commits modifying lines resembling Java method declarations");
         List<Change> changes = new ArrayList<>();
         Pattern pattern = JavaMethodPatternMatcher.instance().getPattern();
 
         Repository repo = git.getRepository();
-        RevWalk walk = new RevWalk(repo);
-        walk.markStart(walk.parseCommit(repo.resolve("HEAD")));
+        ObjectId branchId = repo.resolve("HEAD");
+        Iterable<RevCommit> commits = git.log().add(branchId).call();
 
         //Walk the commit-graph from the latest commit
-        for (RevCommit commit : walk) {
+        for (RevCommit commit : commits) {
             RevCommit[] parents = commit.getParents();
             for (RevCommit parent : parents) {
                 AbstractTreeIterator oldTreeParser = prepareTreeParser(repo, parent.getName());
@@ -93,11 +97,31 @@ public class GitClient {
                 }
             }
         }
+        LOGGER.info("Found {} such commits", changes.size());
         return changes;
     }
 
     /**
-     * Extract diff content as a String for subsequent pattern-matching
+     * Obtains an input stream for the specified file from the given revision (i.e. commit) of the repository
+     */
+    public InputStream getFileAtRevision(String revId, String filePath, Repository repo) throws IOException {
+        RevCommit commit = new RevWalk(repo).parseCommit(repo.resolve(revId));          //resolve commit ID
+        TreeWalk treeWalk = new TreeWalk(repo);
+        treeWalk.addTree(commit.getTree());
+        treeWalk.setRecursive(true);
+        treeWalk.setFilter(PathFilter.create(filePath));                                //and set a TreeWalk to the required file
+
+        if (!treeWalk.next()) {
+            throw new RuntimeException("Specified file not found at given commit ID");
+        }
+
+        ObjectId objectId = treeWalk.getObjectId(0);
+        ObjectLoader loader = repo.open(objectId);
+        return loader.openStream();
+    }
+
+    /**
+     * Extract diff content from a DiffEntry as a String for subsequent pattern-matching
      */
     private String getDiffContent(Repository repo, DiffEntry diff) throws IOException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();

@@ -1,4 +1,4 @@
-package com.overlord.gitstats.analyser;
+package com.overlord.gitstats.analyser.integration;
 
 import com.github.javaparser.ParseProblemException;
 import com.github.javaparser.ast.body.Parameter;
@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class ApplicationTest {
+public class ApplicationIntegrationTest {
 
     private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 

@@ -10,6 +10,7 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
 public class GitClientIntegrationTest {
@@ -30,6 +31,18 @@ public class GitClientIntegrationTest {
                 .cloneRepository();
         List<Change> changes = gitClient.getChangesModifyingJavaMethodDeclarations(repo);
         Assert.assertFalse(changes.isEmpty());
+        repo.close();
+        Utils.deleteRecursively(new File("test-output"));
+    }
+
+    @Test
+    public void shouldGetFileAtCommitId() throws GitAPIException, IOException {
+        GitClient gitClient = new GitClient("https://github.com/overlord1109/ctci.git", "test-output");
+        Git repo = gitClient.cloneRepository();
+        final String filePath = "chapter4/build.order/BuildOrder.java";
+        final String commitId = "0aaa7cafbe937a5a6cdc7a95742104ac07c7c9c7";
+        InputStream in = gitClient.getFileAtRevision(commitId, filePath, repo.getRepository());
+        Assert.assertNotEquals(0, in.available());
         repo.close();
         Utils.deleteRecursively(new File("test-output"));
     }
