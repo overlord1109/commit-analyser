@@ -37,7 +37,7 @@ TODO: Explain core logic here
 
 ## Sample Reports:
 
-Please find sample reports in `/reports` directory generated for following repositories:
+Please find sample reports in `/reports` directory generated for some trending Java repositories:
 * [redisson](https://github.com/redisson/redisson.git) : ~6000 commits on default branch, 2m40s to generate report on my local machine
 *
 *
