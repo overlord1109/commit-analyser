@@ -43,7 +43,7 @@ The core logic to identify whether a parameter was removed is as follows:
    
         New function signature: "myFunc" : \["int", "MyClass", "double"\]
         
-   _Note: local parameter variables are not considered as they do not change function signatures
+   _Note: local parameter variables are not considered as they do not change function signatures_
 2. Element-wise compare each parameter from old list to corresponding parameter from new list, 
    if there is a mismatch, report that parameter was removed from the list.
 
