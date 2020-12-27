@@ -1,8 +1,12 @@
 package com.overlord.gitstats.analyser.model;
 
-public class Change {
+/**
+ * Represents that something of relevance was modified in file at filePath
+ * between the commits oldCommitId and newCommitId
+ */
+public class ChangedFile {
 
-    public Change(String filePath, String oldCommitId, String newCommitId) {
+    public ChangedFile(String filePath, String oldCommitId, String newCommitId) {
         this.filePath = filePath;
         this.oldCommitId = oldCommitId;
         this.newCommitId = newCommitId;

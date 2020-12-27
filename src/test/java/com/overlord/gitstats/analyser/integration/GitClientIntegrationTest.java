@@ -1,7 +1,7 @@
 package com.overlord.gitstats.analyser.integration;
 
 import com.overlord.gitstats.analyser.git.GitClient;
-import com.overlord.gitstats.analyser.model.Change;
+import com.overlord.gitstats.analyser.model.ChangedFile;
 import com.overlord.gitstats.analyser.util.Utils;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -29,8 +29,8 @@ public class GitClientIntegrationTest {
         GitClient gitClient = new GitClient("https://github.com/redisson/redisson.git", "test-output");
         Git repo = gitClient
                 .cloneRepository();
-        List<Change> changes = gitClient.getChangesModifyingJavaMethodDeclarations(repo);
-        Assert.assertFalse(changes.isEmpty());
+        List<ChangedFile> changedFiles = gitClient.getChangesModifyingJavaMethodDeclarations(repo);
+        Assert.assertFalse(changedFiles.isEmpty());
         repo.close();
         Utils.deleteRecursively(new File("test-output"));
     }

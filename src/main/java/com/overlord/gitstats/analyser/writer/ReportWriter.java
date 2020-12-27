@@ -24,6 +24,7 @@ public class ReportWriter {
     }
 
     public String writeCsv(List<ReportRow> reportRow) {
+        LOGGER.info("Writing report");
         File parent = new File(this.parentDir);
         if(!parent.exists())
             parent.mkdir();
@@ -47,5 +48,9 @@ public class ReportWriter {
         String datetime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
         String validCharsRepoName = this.repoName.replaceAll("[\\\\/:*\"<>|]", "");
         return "report_" + validCharsRepoName + '_' + datetime + ".csv";
+    }
+
+    public static String extractRepoName(String url) {
+        return url.substring(url.lastIndexOf('/') + 1).split("\\.")[0];
     }
 }

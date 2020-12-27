@@ -1,6 +1,6 @@
 package com.overlord.gitstats.analyser.git;
 
-import com.overlord.gitstats.analyser.model.Change;
+import com.overlord.gitstats.analyser.model.ChangedFile;
 import com.overlord.gitstats.analyser.regex.JavaMethodPatternMatcher;
 import org.eclipse.jgit.api.CloneCommand;
 import org.eclipse.jgit.api.Git;
@@ -61,8 +61,8 @@ public class GitClient {
      * This method walks commits and filters for the commits that have modified a "*.java" file,
      * and whose diff contents match something resembling a Java method declaration
      */
-    public List<Change> getChangesModifyingJavaMethodDeclarations(Git git) throws IOException, GitAPIException {
-        List<Change> changes = new ArrayList<>();
+    public List<ChangedFile> getChangesModifyingJavaMethodDeclarations(Git git) throws IOException, GitAPIException {
+        List<ChangedFile> changedFiles = new ArrayList<>();
         Pattern pattern = JavaMethodPatternMatcher.instance().getPattern();
 
         Repository repo = git.getRepository();
@@ -88,12 +88,12 @@ public class GitClient {
                     //Only include those diffs which modified something resembling a Java method declaration
                     boolean matches = pattern.matcher(getDiffContent(repo, diff)).find();
                     if (matches) {
-                        changes.add(new Change(diff.getNewPath(), parent.getName(), commit.getName()));
+                        changedFiles.add(new ChangedFile(diff.getNewPath(), parent.getName(), commit.getName()));
                     }
                 }
             }
         }
-        return changes;
+        return changedFiles;
     }
 
     /**

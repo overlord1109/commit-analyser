@@ -1,8 +1,44 @@
 package com.overlord.gitstats.analyser;
 
+import com.overlord.gitstats.analyser.core.ReportGenerator;
+import com.overlord.gitstats.analyser.git.GitClient;
+import com.overlord.gitstats.analyser.model.ChangedFile;
+import com.overlord.gitstats.analyser.model.ReportRow;
+import com.overlord.gitstats.analyser.parser.JavaSourceParser;
+import com.overlord.gitstats.analyser.writer.ReportWriter;
+import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.errors.GitAPIException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.util.List;
+
+import static com.overlord.gitstats.analyser.writer.ReportWriter.extractRepoName;
+
 public class Application {
 
-    public static void main(String[] args) {
-        System.out.println("Hello world!");
+    private static final Logger LOGGER = LoggerFactory.getLogger(Application.class);
+
+    public static void main(String[] args) throws GitAPIException, IOException {
+        //TODO: Get repo link and file path from arglist. Verify whether repo link is a valid https link
+
+        String remoteUrl = "https://github.com/cabaletta/baritone.git";
+        String localStoragePath = "test-output";
+
+        GitClient gitClient = new GitClient(remoteUrl, localStoragePath);
+        Git git = gitClient.cloneRepository();
+        List<ChangedFile> changedFiles = gitClient.getChangesModifyingJavaMethodDeclarations(git);
+
+        JavaSourceParser parser = new JavaSourceParser();
+        List<ReportRow> report = new ReportGenerator(gitClient, parser, git.getRepository())
+                .generateReport(changedFiles);
+        LOGGER.info("Found {} commits where method parameters were removed.", report.size());
+
+        ReportWriter reportWriter = new ReportWriter(localStoragePath, extractRepoName(remoteUrl));
+        String reportName = reportWriter.writeCsv(report);
+        if (reportName != null)
+            LOGGER.info("Wrote report to {}", reportName);
+        git.close();
     }
 }
