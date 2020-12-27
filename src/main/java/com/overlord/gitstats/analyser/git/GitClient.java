@@ -14,6 +14,7 @@ import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
+import org.eclipse.jgit.revwalk.filter.RevFilter;
 import org.eclipse.jgit.treewalk.AbstractTreeIterator;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 import org.eclipse.jgit.treewalk.TreeWalk;
@@ -44,17 +45,24 @@ public class GitClient {
     }
 
     public Git cloneRepository() throws GitAPIException, IOException {
-        LOGGER.info("Cloning remote repository present at {} at local path {}", httpsUrl, localStoragePath);
+        String localRepoPath = localStoragePath + File.separator + "remote";
+        LOGGER.info("Cloning remote repository present at {} at local path '{}'", httpsUrl, localRepoPath);
         File parentDir = new File(localStoragePath);
+        File dir = new File(localRepoPath);
+
+        if (!parentDir.exists())
+            parentDir.mkdir();
 
         //Clean directory before-hand
-        if (parentDir.exists())
-            deleteRecursively(parentDir);
+        if (dir.exists()) {
+            LOGGER.warn("Directory {} exists. Contents of this directory would be recursively deleted.", localRepoPath);
+            deleteRecursively(dir);
+        }
 
         Git git = new CloneCommand()
                 .setTimeout(60)
                 .setURI(this.httpsUrl)
-                .setDirectory(new File(localStoragePath + File.separator + "remote"))
+                .setDirectory(dir)
                 .call();
         LOGGER.info("Repository cloned");
         return git;
@@ -62,7 +70,8 @@ public class GitClient {
 
     /**
      * This method walks commits and filters for the commits that have modified a "*.java" file,
-     * and whose diff contents match something resembling a Java method declaration
+     * and whose diff contents match something resembling a Java method declaration. Skips commits
+     * which were merges to avoid duplicates.
      */
     public List<ChangedFile> getChangesModifyingJavaMethodDeclarations(Git git) throws IOException, GitAPIException {
         LOGGER.info("Obtaining commits modifying lines resembling Java method declarations");
@@ -71,7 +80,10 @@ public class GitClient {
 
         Repository repo = git.getRepository();
         ObjectId branchId = repo.resolve("HEAD");
-        Iterable<RevCommit> commits = git.log().add(branchId).call();
+        Iterable<RevCommit> commits = git.log()
+                .setRevFilter(RevFilter.NO_MERGES)
+                .add(branchId)
+                .call();
 
         //Walk the commit-graph from the latest commit
         for (RevCommit commit : commits) {
