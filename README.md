@@ -25,9 +25,15 @@ BUILD SUCCESSFUL in 22s
 4 actionable tasks: 3 executed, 1 up-to-date
 
 ```
-## Flow:
+## Flow
+
+A flowchart describing high-level flow of the program:
 
 <img src="https://github.com/overlord1109/commit-analyser/blob/main/blob/flow.png" alt="IMAGE ALT TEXT HERE" width="1024" height="768" border="10" />
+
+## Core logic
+
+TODO: Explain core logic here
 
 ## Sample Reports:
 
