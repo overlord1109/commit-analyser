@@ -27,7 +27,7 @@ BUILD SUCCESSFUL in 22s
 ```
 ## Flow:
 
-**$Add image$**
+<img src="https://github.com/overlord1109/commit-analyser/blob/main/blob/flow.png" alt="IMAGE ALT TEXT HERE" width="1024" height="768" border="10" />
 
 ### Current assumptions:
 
