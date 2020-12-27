@@ -21,10 +21,19 @@ public class Application {
     private static final Logger LOGGER = LoggerFactory.getLogger(Application.class);
 
     public static void main(String[] args) throws GitAPIException, IOException {
-        //TODO: Get repo link and file path from arglist. Verify whether repo link is a valid https link
 
-        String remoteUrl = "https://github.com/cabaletta/baritone.git";
-        String localStoragePath = "test-output";
+        if (args.length != 2) {
+            LOGGER.error("Usage: java -jar [remote-url] [output-path]");
+            return;
+        }
+
+        String remoteUrl = args[0];
+        String localStoragePath = args[1];
+
+        if (!remoteUrl.startsWith("https://") || !remoteUrl.endsWith(".git")) {
+            LOGGER.error("Remote-url should be valid HTTPS Git url");
+            return;
+        }
 
         GitClient gitClient = new GitClient(remoteUrl, localStoragePath);
         Git git = gitClient.cloneRepository();
@@ -33,7 +42,7 @@ public class Application {
         JavaSourceParser parser = new JavaSourceParser();
         List<ReportRow> report = new ReportGenerator(gitClient, parser, git.getRepository())
                 .generateReport(changedFiles);
-        LOGGER.info("Found {} commits where method parameters were removed.", report.size());
+        LOGGER.info("Found {} commits where method parameters were removed", report.size());
 
         ReportWriter reportWriter = new ReportWriter(localStoragePath, extractRepoName(remoteUrl));
         String reportName = reportWriter.writeCsv(report);

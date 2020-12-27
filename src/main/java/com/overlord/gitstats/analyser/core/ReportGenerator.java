@@ -2,11 +2,14 @@ package com.overlord.gitstats.analyser.core;
 
 import com.github.javaparser.ParseProblemException;
 import com.github.javaparser.ast.body.Parameter;
+import com.overlord.gitstats.analyser.Application;
 import com.overlord.gitstats.analyser.git.GitClient;
 import com.overlord.gitstats.analyser.model.ChangedFile;
 import com.overlord.gitstats.analyser.model.ReportRow;
 import com.overlord.gitstats.analyser.parser.JavaSourceParser;
 import org.eclipse.jgit.lib.Repository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,6 +20,7 @@ import java.util.stream.Collectors;
 
 public class ReportGenerator {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(Application.class);
     private GitClient gitClient;
     private JavaSourceParser parser;
     private Repository repo;
@@ -39,6 +43,7 @@ public class ReportGenerator {
      * parameter removal
      */
     public List<ReportRow> generateReport(List<ChangedFile> changedFiles) throws IOException {
+        LOGGER.info("Iterating over commits, parsing files if required and generating report..");
         List<ReportRow> report = new ArrayList<>();
         for (ChangedFile changedFile : changedFiles) {
             try {

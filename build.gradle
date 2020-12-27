@@ -29,6 +29,10 @@ jar {
 
 jar.dependsOn(shadowJar)
 
+task run(type: JavaExec) {
+    classpath = files(tasks.shadowJar)
+}
+
 test {
     exclude "**/integration/**"
 }
