@@ -37,7 +37,9 @@ The core logic to identify whether a parameter was removed is as follows:
 
 1. Obtain old and new function signature with their name and parameter type list.
    
-   e.g. ```Old function signature: "myFunc" : \["int", "MyClass", "long"\]```
+   e.g. 
+   
+        Old function signature: "myFunc" : \["int", "MyClass", "long"\]
    
         New function signature: "myFunc" : \["int", "MyClass", "double"\]
         
