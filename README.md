@@ -1,5 +1,5 @@
 # commit-analyser
-This program analyses a code repository and generates a report that lists all commits that edited method parameters.
+This program analyses a code repository and generates a report that lists all commits that removed method parameters.
 
 To run, please clone the project and run the following from the command-line:
 
@@ -25,11 +25,11 @@ BUILD SUCCESSFUL in 22s
 4 actionable tasks: 3 executed, 1 up-to-date
 
 ```
+## Flow:
 
-
+**$Add image$**
 
 ### Current assumptions:
 
-The program expects an HTTPS Git remote URL.
-
-This program analyses commits only for the default branch (generally main or master branch). It would not be difficult to extend the same code to generate report for all branches.
+* The program expects an HTTPS Git remote URL.
+* This program analyses commits starting from where the HEAD points at (generally main or master branch) and walks these commits backwards. It would not be difficult to extend the same code to generate report for all branches.
