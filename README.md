@@ -1,6 +1,20 @@
 # commit-analyser
 This program analyses a code repository and generates a report that lists all commits that removed method parameters.
 
+## Sample Reports:
+
+Please find sample reports in `/reports` directory generated for some popular Java repositories:
+* [redisson](https://github.com/redisson/redisson.git) : ~6000 commits on default branch, 2m40s to generate report on my local machine
+* [retrofit](https://github.com/square/retrofit.git) : ~2000 commits on default branch, 46s to generate report on my local machine
+* [spring-boot](https://github.com/spring-projects/spring-boot.git) ~30000 commits on default branch, 7m40s to generate report on my local machine
+
+_Note: times mentioned include time taken to clone the repository_
+
+## Running the program:
+
+#### Prerequisite for the running the program:
+* Java 8
+
 To run, please clone the project and run the following from the command-line:
 
 ```./gradlew run --args='[https-remote-git-url] [output-path]'```
@@ -35,26 +49,52 @@ A flowchart describing high-level flow of the program:
 
 The core logic to identify whether a parameter was removed is as follows:
 
-1. Obtain old and new function signature with their name and parameter type list.
+1. Obtain old and new function signatures with their name and parameter type list.
    
    e.g. 
    
-        Old function signature: "myFunc" : \["int", "MyClass", "long"\]
+        Old function signature: "myFunc" : ["int", "MyClass", "long"]
    
-        New function signature: "myFunc" : \["int", "MyClass", "double"\]
+        New function signature: "myFunc" : ["int", "MyClass", "double"]
         
    _Note: local parameter variables are not considered as they do not change function signatures_
-2. Element-wise compare each parameter from old list to corresponding parameter from new list, 
-   if there is a mismatch, report that parameter was removed from the list.
+2. Element-wise compare each parameter from old list to corresponding parameter from new list.
+   In case of a mismatch, report that parameter was removed from the list.
+   
+   Essentially, if the old parameter list is not a prefix of the new parameter list, a parameter is considered to as removed.
+   i.e. such a case would also be part of the report:
+           
+        Old function signature: "myFunc" : ["int", "short"]
+   
+        New function signature: "myFunc" : ["int", "long", "String", "int"]
+   
+   Here, the program considers the second "int" parameter was removed.
+   
+Rationale behind this logic is:
 
-## Sample Reports:
+* Simplicity
+* Local parameter variable names do not form a part of the function signature. Thus, it is questionable for the analyser to arbit 
+  that if a parameter has changed place, then that parameter carries the same function as before and should not be considered as "removed".
+  
+  e.g. Consider a function signature `"test" : ["ClassA", "int"]` which was changed to `"test" : ["String", "ClassA", "MyInterfaceImpl", "int", "List<Integer>"]`
+       Should the analyser confidently assert that the original `ClassA` and `int` parameters hold same functionality in the changed method? Or should it report
+       this method? This is a potential point of contention.
+  
+I would like to propose another logic, which, in retrospect, might have been more appropriate:
 
-Please find sample reports in `/reports` directory generated for some popular Java repositories:
-* [redisson](https://github.com/redisson/redisson.git) : ~6000 commits on default branch, 2m40s to generate report on my local machine
-* [retrofit](https://github.com/square/retrofit.git) : ~2000 commits on default branch, 46s to generate report on my local machine
-* [spring-boot](https://github.com/spring-projects/spring-boot.git) ~30000 commits on default branch, 7m40s to generate report on my local machine
+Consider parameter lists as ordered sets. If the old parameter set is a subset of the new parameter set, then no parameter was removed
+and such occurence would not be reported.
 
-_Note: times mentioned include time taken to clone the repository_
+Illustration of proposed method:
+
+        Old function signature: "myFunc" : ["int", "short"]
+   
+        New function signature: "myFunc" : ["int", "long", "String", "short"]
+        
+The ordered set `["int", "int"]` is a subset (order  maintained) of `["int", "long", "String", "short"]`. Thus, no parameter is removed.
+
+In view of time and scope, I used the first approach. However, adopting the second approach should not be too difficult to implement (Java
+natively provides TreeSet, an ordered set implementation).
 
 ## Current assumptions:
 
