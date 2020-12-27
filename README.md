@@ -3,7 +3,7 @@ This program analyses a code repository and generates a report that lists all co
 
 To run, please clone the project and run the following from the command-line:
 
-```"./gradlew run --args='[https-remote-git-url] [output-path]'"```
+```./gradlew run --args='[https-remote-git-url] [output-path]'```
 
 Sample output:
 
