@@ -29,7 +29,7 @@ BUILD SUCCESSFUL in 22s
 
 A flowchart describing high-level flow of the program:
 
-<img src="blob/flow.png" alt="IMAGE ALT TEXT HERE" width="1024" height="768" border="10" />
+<img src="blob/flow.png" alt="IMAGE ALT TEXT HERE" width="1024" height="700" border="10" />
 
 ## Core logic
 
