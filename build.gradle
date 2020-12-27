@@ -1,5 +1,6 @@
 plugins {
     id 'java'
+    id 'com.github.johnrengelman.shadow' version '6.1.0'
 }
 
 group 'com.overlord.gitstats'
@@ -18,11 +19,21 @@ dependencies {
     testImplementation 'junit:junit:4.13.1'
 }
 
+jar {
+    manifest {
+        attributes(
+                'Main-Class': 'com.overlord.gitstats.analyser.Application'
+        )
+    }
+}
+
+jar.dependsOn(shadowJar)
+
 test {
     exclude "**/integration/**"
 }
 
-task integrationTests(type:Test){
+task integrationTests(type: Test) {
     filter {
         includeTestsMatching "com.overlord.gitstats.analyser.integration.*"
     }
