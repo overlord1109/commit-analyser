@@ -33,7 +33,17 @@ A flowchart describing high-level flow of the program:
 
 ## Core logic
 
-TODO: Explain core logic here
+The core logic to identify whether a parameter was removed is as follows:
+
+1. Obtain old and new function signature with their name and parameter type list.
+   
+   e.g. Old function signature: "myFunc" : \["int", "MyClass", "long"\]
+   
+        New function signature: "myFunc" : \["int", "MyClass", "double"\]
+        
+   _Note: local parameter variables are not considered as they do not change function signatures
+2. Element-wise compare each parameter from old list to corresponding parameter from new list, 
+   if there is a mismatch, report that parameter was removed from the list.
 
 ## Sample Reports:
 
