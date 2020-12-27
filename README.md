@@ -29,7 +29,14 @@ BUILD SUCCESSFUL in 22s
 
 <img src="https://github.com/overlord1109/commit-analyser/blob/main/blob/flow.png" alt="IMAGE ALT TEXT HERE" width="1024" height="768" border="10" />
 
-### Current assumptions:
+## Sample Reports:
+
+Please find sample reports in `/reports` directory generated for following repositories:
+* [redisson](https://github.com/redisson/redisson.git) : ~6000 commits on default branch, 2m40s to generate report on my local machine
+*
+*
+
+## Current assumptions:
 
 * The program expects an HTTPS Git remote URL.
 * This program analyses commits starting from where the HEAD points at (generally main or master branch) and walks these commits backwards. It would not be difficult to extend the same code to generate report for all branches.
