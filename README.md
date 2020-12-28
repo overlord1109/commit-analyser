@@ -71,7 +71,7 @@ The core logic to identify whether a parameter was removed is as follows:
    Essentially, if the old parameter list is not a prefix of the new parameter list, a parameter is considered to as removed.
    i.e. such a case would also be part of the report:
            
-        Old function signature: "myFunc" : ["int", "short"]
+        Old function signature: "myFunc" : ["int", "int"]
    
         New function signature: "myFunc" : ["int", "long", "String", "int"]
    
