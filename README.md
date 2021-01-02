@@ -19,6 +19,13 @@ To run, please clone the project and run the following from the command-line:
 
 ```./gradlew run --args='[https-remote-git-url] [output-path]'```
 
+```
+[https-remote-git-url]   =    a valid HTTPS remote Git URL to a public repository
+[output-path]            =    a valid path on local filesystem where the program has RW access
+```
+
+_Note: both arguments are required and in the exact order. Changing the order would result in undefined behaviour._
+
 Sample output:
 
 ```Mandar@Mandar-PC MINGW64 ~/Desktop/commit-analyser (main)
@@ -64,7 +71,7 @@ The core logic to identify whether a parameter was removed is as follows:
    Essentially, if the old parameter list is not a prefix of the new parameter list, a parameter is considered to as removed.
    i.e. such a case would also be part of the report:
            
-        Old function signature: "myFunc" : ["int", "short"]
+        Old function signature: "myFunc" : ["int", "int"]
    
         New function signature: "myFunc" : ["int", "long", "String", "int"]
    
