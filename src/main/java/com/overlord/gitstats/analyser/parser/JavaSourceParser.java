@@ -3,39 +3,43 @@ package com.overlord.gitstats.analyser.parser;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.MethodDeclaration;
-import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 
 import java.io.InputStream;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class JavaSourceParser {
 
-    //Extract method declarations as a map of the method name to a list of parameters
-    public Map<String, List<Parameter>> extractDeclarations(InputStream in) {
+    /**
+     * Extract method declarations as a list of MethodDeclaration.
+     * Relevant fields in MethodDecalaration instance are:
+     *
+     *  String name - this is the name of the method
+     *  List<Parameter> parameterList - List of parameters (only Type is considered)
+     */
+    public List<MethodDeclaration> extractDeclarations(InputStream in) {
         CompilationUnit cu = StaticJavaParser.parse(in);
-        MethodVisitor methodVisitor = new MethodVisitor(new HashMap<>());
+        MethodVisitor methodVisitor = new MethodVisitor(new ArrayList<>());
         methodVisitor.visit(cu, null);
         return methodVisitor.getDeclarations();
     }
 
     private static class MethodVisitor extends VoidVisitorAdapter<Void> {
 
-        private final Map<String, List<Parameter>> declarations;
+        private final List<MethodDeclaration> declarations;
 
-        public MethodVisitor(Map<String, List<Parameter>> declarations) {
+        public MethodVisitor(List<MethodDeclaration> declarations) {
             this.declarations = declarations;
         }
 
         @Override
         public void visit(MethodDeclaration declaration, Void arg) {
             super.visit(declaration, arg);
-            declarations.put(declaration.getName().asString(), declaration.getParameters());
+            declarations.add(declaration);
         }
 
-        public Map<String, List<Parameter>> getDeclarations() {
+        public List<MethodDeclaration> getDeclarations() {
             return declarations;
         }
     }
