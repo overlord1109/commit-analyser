@@ -56,53 +56,114 @@ A flowchart describing high-level flow of the program:
 
 The core logic to identify whether a parameter was removed is as follows:
 
-1. Obtain old and new function signatures with their name and parameter type list.
+1. Obtain function signatures from old and new revisions of a Java file as a list.
    
-   e.g. 
+  e.g.  Consider a Java file with following method declarations:
    
-        Old function signature: "myFunc" : ["int", "MyClass", "long"]
+         int subtract(int a, int b, long c)
+         
+         List<Integer> concatenate(List<Integer> list1, List<Integer> list2)
+         
+         void methodA()
+         
+         void methodC()
+         
+         void methodD(ClassA a, int count)
+ 
+  which were changed to
+  
+         int subtract(int a, long c)
+         
+         List<Integer> concatenate(List<Integer> list1, List<Integer> list2, List<Integer> list3)
+         
+         void methodB()       //methodA refactored to methodB
+         
+         void methodC()
+         
+         void methodD(ClassA a, long count)
    
-        New function signature: "myFunc" : ["int", "MyClass", "double"]
+   Here, old and new method declarations are obtained as follows:
+   
+      oldMethodDeclarations: [
+      {"methodName":"subtract", "paramList":["int", "int", "long"]},
+      {"methodName":"concatenate", "paramList":["List<Integer>", "List<Integer>"]},
+      {"methodName":"methodA", "paramList":[]},
+      {"methodName":"methodC", "paramList":[]},
+      {"methodName":"methodD", "paramList":["ClassA", "int"]}
+      ]
+
+      newMethodDeclarations: [
+      {"methodName":"subtract", "paramList":["int", "long"]},
+      {"methodName":"concatenate", "paramList":["List<Integer>", "List<Integer>", "List<Integer>"]},
+      {"methodName":"methodB", "paramList":[]},
+      {"methodName":"methodC", "paramList":[]},
+      {"methodName":"methodD", "paramList":["ClassA", "long"]},
+      ]
         
    _Note: local parameter variables are not considered as they do not change function signatures_
-2. Element-wise compare each parameter from old list to corresponding parameter from new list.
-   In case of a mismatch, report that parameter was removed from the list.
    
-   Essentially, if the old parameter list is not a prefix of the new parameter list, a parameter is considered to as removed.
-   i.e. such a case would also be part of the report:
-           
-        Old function signature: "myFunc" : ["int", "int"]
+2. Compare new and old method declarations, and:
+   * Remove newly added or deleted methods
+   * Remove methods that did not change
    
-        New function signature: "myFunc" : ["int", "long", "String", "int"]
+   After this operation, the above lists are reduced to:
    
-   Here, the program considers the second "int" parameter was removed.
-   
-Rationale behind this logic is:
+       oldMethodDeclarations: [
+       {"methodName":"subtract", "paramList":["int", "int", "long"]},
+       {"methodName":"concatenate", "paramList":["List<Integer>", "List<Integer>"]},
+       {"methodName":"methodD", "paramList":["ClassA", "int"]}
+       ]
 
-* Simplicity
-* Local parameter variable names do not form a part of the function signature. Thus, it is questionable for the analyser to arbit 
-  that if a parameter has changed place, then that parameter carries the same function as before and should not be considered as "removed".
+       newMethodDeclarations: [
+       {"methodName":"subtract", "paramList":["int", "long"]},
+       {"methodName":"concatenate", "paramList":["List<Integer>", "List<Integer>", "List<Integer>"]},
+       {"methodName":"methodD", "paramList":["ClassA", "long"]},
+       ]
+
+3. Name-wise consider method declarations one-by-one from old list with corresponding match from new list, and check whether the parameters
+   from the old method declaration are present in the parameter list of new method declaration. Order of the parameters does not matter.
+   
+   The implementation considers the parameter list as a multiset i.e. a set where elements may be duplicated. Multiset is
+   implemented as a map of the element name to its count (Map<String, Integer>). The old parameter multiset is iterated upon,
+   and each element's count is compared against count corresponding to the element in the new parameter multiset. If old count is lesser than
+   newer count, the parameter is considered to be removed, and 'true' is returned.
+   
+   Continuing with our above example, we consider method declarations one-by-one:
+   
+   `{"methodName":"subtract", "paramList":["int", "int", "long"]}`
+   
+    vs
+    
+   `{"methodName":"subtract", "paramList":["int", "long"]}`
+   
+   As new method has one less `int` parameter than the old method, parameter is considered as removed. This instance is **added to the report**.
   
-  e.g. Consider a function signature `"test" : ["ClassA", "int"]` which was changed to `"test" : ["String", "ClassA", "MyInterfaceImpl", "int", "List<Integer>"]`
-       Should the analyser confidently assert that the original `ClassA` and `int` parameters hold same functionality in the changed method? Or should it report
-       this method? This is a potential point of contention.
   
-I would like to propose another logic, which, in retrospect, might have been more appropriate:
-
-Consider parameter lists as ordered sets. If the old parameter set is a subset of the new parameter set, then no parameter was removed
-and such occurence would not be reported.
-
-Illustration of proposed method:
-
-        Old function signature: "myFunc" : ["int", "short"]
+  
+  
+   `{"methodName":"concatenate", "paramList":["List<Integer>", "List<Integer>"]}`
    
-        New function signature: "myFunc" : ["int", "long", "String", "short"]
-        
-The ordered set `["int", "int"]` is a subset (order  maintained) of `["int", "long", "String", "short"]`. Thus, no parameter is removed.
-
-In view of time and scope, I used the first approach. However, adopting the second approach should not be too difficult to implement (Java
-natively provides TreeSet, an ordered set implementation).
-
+     vs
+     
+    `{"methodName":"concatenate", "paramList":["List<Integer>", "List<Integer>", "List<Integer>"]}`
+   
+   As new method has all parameters from the old method, no parameter is considered to be removed. This instance is **not added to the report**.
+   
+   
+   
+   
+   `{"methodName":"methodD", "paramList":["ClassA", "int"]}`
+   
+     vs
+     
+    `{"methodName":"methodD", "paramList":["ClassA", "long"]}`
+   
+   As new method does not have `int` parameter that was previously present in the old method, parameter is considered as removed. This instance
+   is **added to the report**.
+   
+   _Note: When multiple overloaded methods are changed in the same commit, the code uses a best-effort approach to correctly match the changes._
+         _However, it is possible to have adverserial inputs. In such a case, the current version of the core logic will not be able correctly_
+         _match method changes for overloaded methods._
 ## Current assumptions:
 
 * The program expects an HTTPS Git remote URL.
